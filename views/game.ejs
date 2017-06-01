@@ -1,0 +1,280 @@
+
+<html>
+<head>
+    <!-- Deck game as task of castiko -->
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Card game for OCD">
+  <title>Card Game</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700,400&amp;subset=cyrillic,latin,greek,vietnamese">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+
+<script>
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev,tx) {
+    ev.dataTransfer.setData("text", tx);
+    ev.dataTransfer.setData("id", ev.target.id);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    var id = ev.dataTransfer.getData("id");
+    //var targt = document.getElementById(ev.target);
+	if(data.charAt(2)==ev.target.innerHTML.charAt(0) || data.charAt(3)==ev.target.innerHTML.charAt(0)){
+		ev.target.innerHTML=data;
+		document.getElementById("deck").removeChild(document.getElementById(id));
+		check_restart();
+	}
+	else if(data.charAt(2)==ev.target.innerHTML.charAt(2) || data.charAt(2)==ev.target.innerHTML.charAt(3) || data.charAt(3)==ev.target.innerHTML.charAt(2)){
+		ev.target.innerHTML+=","+data;
+		document.getElementById("deck").removeChild(document.getElementById(id));
+		check_restart();
+	}/*else if(data.charAt(0)=="1" && data.charAt(1)=="0")
+	{
+		if(data.charAt(3)==ev.target.innerHTML.charAt(0))
+		{
+			ev.target.innerHTML=data;
+			document.getElementById("deck").removeChild(document.getElementById(id));
+			check_restart();
+		}else if( data.charAt(3)==ev.target.innerHTML.charAt(2)){
+			ev.target.innerHTML+=","+data;
+			document.getElementById("deck").removeChild(document.getElementById(id));
+			check_restart();
+		}else
+			alert("Wrong deck chosen");
+		
+	}*/else
+	alert("Wrong deck chosen");
+	
+}
+</script>
+
+<script>
+var name = "<%= uname %>";
+function save_data()
+{
+	var h=document.getElementById('hearts').innerHTML;
+	var c=document.getElementById('clubs').innerHTML;
+	var s=document.getElementById('spades').innerHTML;
+	var d=document.getElementById('diamond').innerHTML;
+	var cards= $("#deck > div").length;
+	if(h=="Hearts")
+	h="";
+	if(c=="Clubs")
+	c="";
+	if(s=="Spades")
+	s="";
+	if(d=="Diamond")
+	d="";
+	var obj={};
+	obj["Hearts"]=h;
+	obj["Clubs"]=c;
+	obj["Diamond"]=d;
+	obj["Spades"]=s;
+	obj["Cards"]=52-cards;
+	obj["Reset"]=0;
+	
+	var x= JSON.stringify(obj, ["Hearts", "Clubs","Diamond","Spades","Cards","Reset"]);
+
+	//x= x.substring(2,-7);
+	$.ajax(
+	{
+		type:"POST",
+		url:"save_data",
+		dataType:"json",
+		contentType: 'application/json',
+		processdata:false,
+		data:x,
+		async:false,
+		//data:JSON.stringify({Hearts:h,Clubs:c,Diamond:d,Spades:s}),
+		success:function(data)
+		{
+			alert("Data saved");
+			document.getElementById('hearts').innerHTML="Hearts";
+			document.getElementById('clubs').innerHTML="Clubs";
+			document.getElementById('spades').innerHTML="Spades";
+			document.getElementById('diamond').innerHTML="Diamond";
+		},
+		error:function(data)
+		{
+			if(data.statusText=="OK"){
+				alert("Data saved");
+				document.getElementById('hearts').innerHTML="Hearts";
+				document.getElementById('clubs').innerHTML="Clubs";
+				document.getElementById('spades').innerHTML="Spades";
+				document.getElementById('diamond').innerHTML="Diamond";
+			}
+			else
+				alert(data);
+		}
+	});
+
+};
+</script>
+<script>
+function restart(){
+	var obj={};
+	obj["Reset"]=1;
+	var x= JSON.stringify(obj, ["Reset"]);
+
+	//x= x.substring(2,-7);
+	$.ajax(
+	{
+	type:"POST",
+	url:"save_data",
+	dataType:"json",
+	contentType: 'application/json',
+	processdata:false,
+	data:x,
+	success:function(data)
+	{
+		alert("Game Reset");
+		document.location.reload(true);
+	},
+	error:function(data)
+	{
+		if(data.statusText =="OK")
+		{
+		alert("Game Reset");
+		document.location.reload(true);
+		}
+	}
+	});
+}
+
+function check_restart(){
+	if($('#deck').children().length== 0)
+	{
+		document.getElementById('deck').innerHTML="<center><p>Congratulations... You have won!!!<br/><input type='submit' class='btn btn-primary' value='Restart' onclick='javascript:restart();'></p></center>";
+		save_data();
+		
+	}
+	}
+</script>
+
+
+  <script>
+  jQuery(window).on('load',function(){
+  var cards=["A_Club","2_Club","3_Club","4_Club","5_Club","6_Club","7_Club","8_Club","9_Club","10_Club","J_Club","Q_Club","K_Club","A_Hearts","2_Hearts","3_Hearts","4_Hearts","5_Hearts","6_Hearts","7_Hearts","8_Hearts","9_Hearts","10_Hearts","J_Hearts","Q_Hearts","K_Hearts","A_Diamond","2_Diamond","3_Diamond","4_Diamond","5_Diamond","6_Diamond","7_Diamond","8_Diamond","9_Diamond","10_Diamond","J_Diamond","Q_Diamond","K_Diamond","A_Spades","2_Spades","3_Spades","4_Spades","5_Spades","6_Spades","7_Spades","8_Spades","9_Spades","10_Spades","J_Spades","Q_Spades","K_Spades"];
+  var fetch_cards;
+  
+$.ajax(
+{
+type:"GET",
+url:"/data",
+datatype:"json",
+async:false,
+success:function(data)
+{
+//alert(data);
+var parsed=JSON.parse(data);
+if(parsed.hearts!="undefined" && parsed.hearts!="")
+{
+//document.getElementById('hearts').innerHTML=parsed.hearts;
+cards = cards.filter( function( el ) {
+  return parsed.hearts.indexOf( el ) < 0;
+} );
+}
+if(parsed.clubs!="undefined" && parsed.clubs!="")
+{
+//document.getElementById('clubs').innerHTML=parsed.clubs;
+cards = cards.filter( function( el ) {
+  return parsed.clubs.indexOf( el ) < 0;
+} );
+}
+if(parsed.spades!="undefined" && parsed.spades!="")
+{
+//document.getElementById('spades').innerHTML=parsed.spades;
+cards = cards.filter( function( el ) {
+  return parsed.spades.indexOf( el ) < 0;
+} );
+}
+if(parsed.diamond!="undefined" && parsed.diamond!="")
+{
+//document.getElementById('diamond').innerHTML=parsed.diamond;
+cards = cards.filter( function( el ) {
+  return parsed.diamond.indexOf( el ) < 0;
+} );
+}
+fetch_cards=52- parseInt(parsed.cards);
+}
+});
+  var random_cards=_.sample(cards,fetch_cards);
+  console.log(cards);
+    console.log(fetch_cards);
+  var x="";
+  for (i = 0; i < fetch_cards; i++) { 
+  console.log(fetch_cards);
+  x+='<div class="col-md-3 col-sm-4" draggable="true" ondragstart="drag(event,\''+random_cards[i]+'\')" id ="'+random_cards[i]+'"><div class="thumbnail caption"><h3>'+random_cards[i]+'</h3></div></div>';}
+  document.getElementById('deck').innerHTML=x;
+  });
+  
+  </script>
+  <style>
+  html {
+  height: 100%;
+}
+html body {
+  height: 100%;
+  overflow: hidden;
+}
+html body .container-fluid.body-content {
+  position: absolute;
+  top: 50px;
+  bottom: 50px;
+  right: 0;
+  left: 0;
+  overflow-y: auto;
+}
+.header {
+position:absolute;
+    right: 20px;
+  top: 0;
+  left: 20px;
+	height: 40px;
+	overflow:hidden;
+}
+.footer {
+position:absolute;
+    right: 20px;
+  bottom: 0;
+  left: 20px;
+	height: 40px;
+	overflow:hidden;
+}
+
+
+  </style>
+</head>
+<body>   
+    
+	<div class="container">
+	<div class="row header">
+	<div class="col-md-6 col-sm-6">Welcome <%= uname %></div>
+	<div class="col-md-2 col-sm-2"> <input type="submit" class="btn btn-primary btn-sm" value="Save" onclick="javacript:save_data();" /> </div>
+	<div class="col-md-2 col-sm-2"><a href="/profile" class="btn btn-primary btn-sm">Profile</a></div>
+	<div class="col-md-2 col-sm-2"><a href="/logout" class="btn btn-primary btn-sm">Logout</a></div>
+	</div>
+	
+	<div class="container-fluid body-content">
+        <div class="row-fluid" id="deck">         
+        </div>
+    </div>
+	
+	
+	<div class="row footer">
+	<div class="thumbnail col-md-3 col-sm-3" style="background-color: red;border: 0; font-weight:bold;"  id="hearts" ondrop="drop(event)" ondragover="allowDrop(event)"><% if (typeof(hearts) === "undefined" || hearts=== "" || hearts=== "not defined"){ %>Hearts<% }else{ %><%= hearts %><% } %></div>
+	<div class="thumbnail col-md-3 col-sm-3" style="background-color: black;border: 0; color:white; font-weight:bold;" id="clubs"  ondrop="drop(event)" ondragover="allowDrop(event)"><% if (typeof(clubs) !="undefined"){ %><%= clubs %><% }else{ %>Clubs<% } %></div>
+	<div class="thumbnail col-md-3 col-sm-3" style="background-color: red; font-weight:bold;  border: 0;" id="diamond" ondrop="drop(event)" ondragover="allowDrop(event)"><% if (typeof(diamond) !="undefined"){ %><%= diamond %><% }else{ %>Diamond<% } %></div>
+	<div class="thumbnail col-md-3 col-sm-3" style="background-color: black;  border: 0; color:white; font-weight:bold;" id="spades" ondrop="drop(event)" ondragover="allowDrop(event)"><% if (typeof(spades) !="undefined"){ %><%= spades %><% }else{ %>Spades<% } %></div>
+	</div>
+	</div>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>
