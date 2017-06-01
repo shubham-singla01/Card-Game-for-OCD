@@ -4,17 +4,17 @@ Castiko Assignment
 ## Getting Started
 Head on to https://hidden-crag-76923.herokuapp.com/ to check for live deployment.
 
-To run locally:
+## To run locally:
 
 ### Prerequisites
 
-What things you need to install the software
+What things you need to install
 
 ```
 * Node environemt with npm set up
 * Mongo databse installed locally
 ```
-
+### Steps to run locally
 ```
 1. Download [zip](https://github.com/shubham-singla01/Card-Game-for-OCD/archive/master.zip)
 2. Extracct zip.
