@@ -2,7 +2,7 @@
 Castiko Assignment
 
 ## Getting Started
-Head on to https://hidden-crag-76923.herokuapp.com/ to check for live deployment.
+Visit https://hidden-crag-76923.herokuapp.com/ to check for live deployment.
 
 ## To run locally:
 
@@ -24,7 +24,7 @@ What things you need to install
 6. Run node server.js
 ```
 
-### Technologies Used
+## Technologies Used
 
 * Node js - passport module, express server (For complete list see package.json file)
 * Mongo db
@@ -32,7 +32,7 @@ What things you need to install
 * Jquery
 * EJS templates
 
-### How to use deployed version
+## How to use deployed version
 
 ```
 * Sign up for new account.
